@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/** Layered metal and gel roles informed by the owner's Aqua Bliss renderer. */
+/** Layered metal and gel roles informed by the owner's Aqua renderer. */
 @Composable
 fun Modifier.aquaBrushedMetal(dark: Boolean): Modifier {
     val look = LocalLook.current

@@ -88,7 +88,7 @@ open class WorkbenchActivity : ComponentActivity() {
 }
 
 enum class WonderLook(val label: String, val dark: Boolean) {
-    AQUA("Aqua Bliss", false), BLISS("Bliss", false), DARK("Dark Bliss", true), SUPER("Super Bliss", true)
+    AQUA("Aqua", false), BLISS("Bliss", false), DARK("Dark Bliss", true), SUPER("Super", true)
 }
 
 enum class WonderMotion(val label: String) { FULL("Full"), REDUCED("Reduced"), OFF("Off") }

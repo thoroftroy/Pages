@@ -23,7 +23,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
+
+fun pdfPageIndex(value: String, total: Int): Int {
+    require(total > 0) { "Open a document first" }
+    val number = value.trim().toIntOrNull() ?: throw IllegalArgumentException("Enter a page number")
+    require(number in 1..total) { "Enter a page from 1 to $total" }
+    return number - 1
+}
 
 @Composable
 fun PdfScreen() {
@@ -36,6 +44,9 @@ fun PdfScreen() {
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var zoom by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var jump by remember { mutableStateOf(false) }
+    var requestedPage by rememberSaveable { mutableStateOf("") }
+    var pageError by remember { mutableStateOf("") }
     val local = remember { File(context.cacheDir, "pages-current.pdf") }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { value ->
         if (value != null) { context.keepRead(value); uriText = value.toString(); page = 0 }
@@ -54,6 +65,7 @@ fun PdfScreen() {
                     PdfRenderer(ParcelFileDescriptor.open(local, ParcelFileDescriptor.MODE_READ_ONLY)).use { it.pageCount }
                 }
                 total = count; page = page.coerceIn(0, (count - 1).coerceAtLeast(0)); op.notice("PDF opened: $count pages")
+            } catch (e: CancellationException) { throw e
             } catch (e: Exception) { op.notice("Cannot open PDF: ${e.message}. Password-protected and damaged PDFs are not supported.") }
         }
     }
@@ -72,6 +84,7 @@ fun PdfScreen() {
                     }
                 }
                 zoom = 1f; offset = Offset.Zero
+            } catch (e: CancellationException) { throw e
             } catch (e: Exception) { op.notice("Page could not be rendered: ${e.message}") }
         }
     }
@@ -91,5 +104,17 @@ fun PdfScreen() {
             Text(if (total > 0) "${page + 1} / $total" else "No document", Modifier.padding(top = 14.dp))
             AquaSecondaryButton(onClick = { page++ }, enabled = page + 1 < total) { Text("Next") }
         }
+        TextButton(onClick = { requestedPage = (page + 1).toString(); pageError = ""; jump = true }, enabled = total > 0) { Text("Go to page…") }
     }
+    if (jump) AlertDialog(onDismissRequest = { jump = false }, title = { Text("Go to page") }, text = {
+        Column {
+            OutlinedTextField(requestedPage, { requestedPage = it.take(10); pageError = "" }, label = { Text("Page number (1–$total)") }, singleLine = true,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number), isError = pageError.isNotEmpty())
+            if (pageError.isNotEmpty()) Text(pageError, color = MaterialTheme.colorScheme.error)
+        }
+    }, confirmButton = {
+        TextButton(onClick = {
+            runCatching { pdfPageIndex(requestedPage, total) }.onSuccess { page = it; jump = false }.onFailure { pageError = it.message ?: "Invalid page" }
+        }) { Text("Go") }
+    }, dismissButton = { TextButton(onClick = { jump = false }) { Text("Cancel") } })
 }
