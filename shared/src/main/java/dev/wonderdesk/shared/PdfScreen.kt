@@ -1,5 +1,6 @@
 package dev.wonderdesk.shared
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
@@ -36,8 +37,9 @@ fun pdfPageIndex(value: String, total: Int): Int {
 @Composable
 fun PdfScreen() {
     val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("pages", Context.MODE_PRIVATE) }
     val op = rememberOperation()
-    var uriText by rememberSaveable { mutableStateOf((context as ComponentActivity).intent.data?.toString()) }
+    var uriText by rememberSaveable { mutableStateOf((context as ComponentActivity).intent.data?.toString() ?: prefs.getString("last", null)) }
     val uri = uriText?.let(Uri::parse)
     var page by rememberSaveable { mutableIntStateOf(0) }
     var total by remember { mutableIntStateOf(0) }
@@ -49,7 +51,7 @@ fun PdfScreen() {
     var pageError by remember { mutableStateOf("") }
     val local = remember { File(context.cacheDir, "pages-current.pdf") }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { value ->
-        if (value != null) { context.keepRead(value); uriText = value.toString(); page = 0 }
+        if (value != null) { context.keepRead(value); uriText = value.toString(); prefs.edit().putString("last", value.toString()).apply(); page = 0 }
     }
     LaunchedEffect(uriText) {
         total = 0; bitmap = null
