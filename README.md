@@ -1,6 +1,6 @@
 # Pages for Android
 
-Reads PDF documents. By Rednave.
+Reads PDF documents.
 
 ## Easiest install and updates
 
