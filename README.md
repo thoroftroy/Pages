@@ -1,21 +1,25 @@
-# Pages for Android
+# Pages
 
-Reads PDF documents.
+Read, mark up and make PDFs.
 
-## Easiest install and updates
+## What it does
 
-Get App Hub once from https://github.com/thoroftroy/App-Hub/releases, then use it to install and update this app and the rest of the suite. You will not need to download APKs by hand.
-## Install
+- Smooth scrolling with pinch zoom, a page jump, page thumbnails, and night or sepia reading modes. Your library remembers where you stopped in every document.
+- Text search with highlighted matches (Android 15 or newer).
+- Bookmarks with names, plus a pen, highlighter, sticky notes and an eraser on any page. Save an annotated copy, share, or print.
+- **Create**: make PDFs from photos, camera scans or typed text, or merge several PDFs into one.
+- Locked (password-protected) PDFs can't be opened yet.
 
-Install the APK, then open the app. Your phone may ask you to allow unknown sources first. Needs Android 10 or newer.
-## Using Pages
+## Install and update
 
-- Open a PDF to read it. The last file you opened is remembered.
-- Move with Previous/Next or jump to a page number.
-- Pinch to zoom, drag to pan.
+The easiest way is Wonderdesk Apphub: get it once from https://github.com/thoroftroy/App-Hub/releases, then install and update this app and the rest of the suite from there.
 
-Reading only. No text search, annotations or password protected files.
+Or download the APK from this repository's Releases, open it, and allow installing from that source if your phone asks. Needs Android 10 or newer.
 
 ## Look and feel
 
-Open About in the app to change the theme or motion. Aqua is the default.
+Every Wonderdesk app follows the look you pick in Control Room (Aqua, Bliss, Dark Bliss or Super). You can give this app its own look in its Settings.
+
+## Privacy
+
+Everything stays on your phone. No accounts, ads or tracking.

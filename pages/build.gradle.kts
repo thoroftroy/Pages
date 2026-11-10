@@ -21,3 +21,7 @@ tasks.register("collectRootApk") {
 afterEvaluate {
     tasks.named("assembleDebug") { finalizedBy("collectRootApk") }
 }
+
+dependencies {
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
+}
