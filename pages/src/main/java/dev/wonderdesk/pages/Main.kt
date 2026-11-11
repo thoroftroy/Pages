@@ -140,10 +140,10 @@ private fun LibraryTab(onOpen: (LibraryItem) -> Unit, onPick: () -> Unit) {
         LazyVerticalGrid(GridCells.Adaptive(120.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             if (reading.isNotEmpty() && q.isBlank()) {
                 item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { SectionLabel("Continue reading", Modifier.padding(start = 6.dp)) }
-                itemsIndexed(reading, key = { _, it -> "r" + it.uri }) { _, it -> Book(it, onOpen, onRemove = { Library.remove(context, it.uri); items = Library.all(context) }) }
+                itemsIndexed(reading, key = { j, it -> "r$j" + it.uri }) { _, it -> Book(it, onOpen, onRemove = { Library.remove(context, it.uri); items = Library.all(context) }) }
                 item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { SectionLabel("All documents", Modifier.padding(start = 6.dp, top = 6.dp)) }
             }
-            itemsIndexed(shown, key = { _, it -> it.uri }) { _, it -> Book(it, onOpen, onRemove = { Library.remove(context, it.uri); items = Library.all(context) }) }
+            itemsIndexed(shown, key = { j, it -> "s$j" + it.uri }) { _, it -> Book(it, onOpen, onRemove = { Library.remove(context, it.uri); items = Library.all(context) }) }
         }
     }
 }
