@@ -153,7 +153,7 @@ private fun LibraryTab(onOpen: (LibraryItem) -> Unit, onPick: () -> Unit) {
 private fun Book(it: LibraryItem, onOpen: (LibraryItem) -> Unit, onRemove: () -> Unit) {
     val context = LocalContext.current
     val p = wonderPalette()
-    val thumb = remember(it.uri, it.opened) { runCatching { android.graphics.BitmapFactory.decodeFile(Library.thumb(context, it.uri).path)?.asImageBitmap() }.getOrNull() }
+    val thumb = produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, it.uri, it.opened) { value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { android.graphics.BitmapFactory.decodeFile(Library.thumb(context, it.uri).path)?.asImageBitmap() }.getOrNull() } }.value
     var menu by remember { mutableStateOf(false) }
     Column(Modifier.combinedClickable(onClick = { onOpen(it) }, onLongClick = { menu = true })) {
         Box(Modifier.fillMaxWidth().aspectRatio(.72f).clip(RoundedCornerShape(4.dp)).background(Color.White).border(1.dp, p.panelBorder, RoundedCornerShape(4.dp))) {
