@@ -119,8 +119,10 @@ object Library {
         LibraryItem(o.getString("uri"), o.getString("name"), o.optInt("pages"), o.optInt("page"), o.optLong("opened"), o.optBoolean("fav")) } } } }.getOrDefault(emptyList())
     fun put(c: Context, item: LibraryItem) = save(c, listOf(item) + all(c).filter { it.uri != item.uri })
     fun remove(c: Context, uri: String) = save(c, all(c).filter { it.uri != uri })
-    private fun save(c: Context, list: List<LibraryItem>) = prefs(c).edit().putString("library", JSONArray(list.take(100).map {
+    private fun save(c: Context, list: List<LibraryItem>) { prefs(c).edit().putString("library", JSONArray(list.take(100).map {
         JSONObject().put("uri", it.uri).put("name", it.name).put("pages", it.pages).put("page", it.page).put("opened", it.opened).put("fav", it.favorite) }).toString()).apply()
+        if (System.currentTimeMillis() - lastWidget > 30_000) { lastWidget = System.currentTimeMillis(); dev.wonderdesk.shared.refreshWidgets(c, ReadingWidget::class.java) } }
+    private var lastWidget = 0L
     fun thumb(c: Context, uri: String) = java.io.File(c.filesDir, "thumbs").apply { mkdirs() }.let { java.io.File(it, "${uri.hashCode()}.png") }
 }
 

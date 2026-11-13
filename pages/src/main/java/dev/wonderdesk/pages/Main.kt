@@ -137,7 +137,7 @@ private fun LibraryTab(onOpen: (LibraryItem) -> Unit, onPick: () -> Unit) {
     val reading = if (items.size > 3) shown.filter { it.page in 1 until (it.pages - 1).coerceAtLeast(1) }.take(3) else emptyList()
     Column(Modifier.fillMaxSize()) {
         SearchField(q, { q = it }, "Search your library", Modifier.padding(16.dp, 12.dp, 16.dp, 0.dp))
-        LazyVerticalGrid(GridCells.Adaptive(120.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LazyVerticalGrid(GridCells.Adaptive(120.dp), Modifier.fillMaxSize(), state = rememberTabTopGrid(), contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             if (reading.isNotEmpty() && q.isBlank()) {
                 item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { SectionLabel("Continue reading", Modifier.padding(start = 6.dp)) }
                 itemsIndexed(reading, key = { j, it -> "r$j" + it.uri }) { _, it -> Book(it, onOpen, onRemove = { Library.remove(context, it.uri); items = Library.all(context) }) }

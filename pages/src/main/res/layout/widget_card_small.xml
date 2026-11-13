@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@drawable/wd_widget_bg" android:padding="6dp" android:gravity="center">
+    <ImageView android:id="@+id/w_img" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scaleType="centerCrop"
+        android:background="@drawable/wd_img_round" android:clipToOutline="true" android:visibility="gone"/>
+    <TextView android:id="@+id/w_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="13sp" android:textStyle="bold" android:maxLines="2" android:ellipsize="end" android:textColor="#FF1B1D21"/>
+    <TextView android:id="@+id/w_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" android:textColor="#FF6B7078"/>
+    <TextView android:id="@+id/w_label" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ProgressBar android:id="@+id/w_bar" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="4dp" android:layout_marginTop="3dp" android:max="100" android:progressDrawable="@drawable/wd_bar" android:visibility="gone"/>
+    <TextView android:id="@+id/w_btn" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+</LinearLayout>
