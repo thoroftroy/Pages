@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.7
+
+- Widgets: choose the title colour in each widget's settings (automatic, white, dark, Aqua blue, Super pink or gold), on top of the background looks
+
 ## v0.5.6
 
 - New “On this phone” tab: every PDF on your phone in one list, newest first, with search and sorting by name, size or folder. One tap opens it, no file picker
