@@ -111,10 +111,11 @@ fun PagesApp() {
     val o = opened
     if (o != null) { Reader(o.first, o.second, onClose = { opened = null }); return }
     WonderApp(appName = "Pages", about = ABOUT,
-        tabs = listOf(WonderTab("library", "Library", WonderIcons.MenuBook), WonderTab("create", "Create", WonderIcons.NoteAdd)),
+        tabs = listOf(WonderTab("library", "Library", WonderIcons.MenuBook), WonderTab("phone", "On this phone", WonderIcons.PictureAsPdf), WonderTab("create", "Create", WonderIcons.NoteAdd)),
         selectedTab = tab, onTab = { tab = it },
         actions = { ToolbarButton(WonderIcons.FolderOpen, "Open PDF", { picker.launch(arrayOf("application/pdf")) }) }) {
-        if (tab == "create") CreateTab(onCreated = { uri -> opened = uri to context.displayName(uri) })
+        if (tab == "phone") PhoneTab(onOpen = { uri, name -> opened = uri to name })
+        else if (tab == "create") CreateTab(onCreated = { uri -> opened = uri to context.displayName(uri) })
         else LibraryTab(onOpen = { opened = Uri.parse(it.uri) to it.name }, onPick = { picker.launch(arrayOf("application/pdf")) })
     }
 }

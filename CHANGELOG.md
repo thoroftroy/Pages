@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.6
+
+- New “On this phone” tab: every PDF on your phone in one list, newest first, with search and sorting by name, size or folder. One tap opens it, no file picker
+
 ## v0.5.5
 
 - Widgets can now match your look: new Bliss blue and Super neon backgrounds, and “Match my Wonderdesk look” follows whatever Control Room is set to
