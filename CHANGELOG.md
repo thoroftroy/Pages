@@ -1,5 +1,10 @@
 # Pages changelog
 
+## v0.5.10
+
+- Widgets show a realistic preview in the widget list, so you can see what you're adding
+- Fixed a crash when moving around with arrow keys or Tab while a screen was closing
+
 ## v0.5.9
 
 - The Continue reading widget wakes the phone far less often; it refreshes itself when you read

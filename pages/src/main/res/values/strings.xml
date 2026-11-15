@@ -1,3 +1,7 @@
 <resources>
     <string name="widget_readingwidget_desc">The document you were reading, at your page</string>
+    <string name="wp_label">Continue reading</string>
+    <string name="wp_title">Your document</string>
+    <string name="wp_text">Page 12 of 80</string>
+    <string name="wp_btn">Read</string>
 </resources>
