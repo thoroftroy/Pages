@@ -266,7 +266,7 @@ private fun Reader(uri: Uri, name: String, onClose: () -> Unit) {
         toastRef.value = LocalToast.current
         when {
             error != null -> EmptyState("Can't open this PDF", error!!, icon = WonderIcons.PictureAsPdf)
-            d == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = p.accent) }
+            d == null -> LoadingPane("Opening the document", detail = "Reading its pages")
             else -> Column(Modifier.fillMaxSize()) {
                 if (searching) Column(Modifier.background(p.window).padding(12.dp)) {
                     SearchField(query, { query = it }, if (Build.VERSION.SDK_INT >= 35) "Search this document" else "Search needs Android 15 or newer")
