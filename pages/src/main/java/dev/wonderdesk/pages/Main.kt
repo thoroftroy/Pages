@@ -21,6 +21,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateCentroid
+import kotlin.math.roundToInt
+import androidx.compose.animation.core.animateDecay
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -113,7 +116,8 @@ fun PagesApp() {
     WonderApp(appName = "Pages", about = ABOUT,
         tabs = listOf(WonderTab("library", "Library", WonderIcons.MenuBook), WonderTab("phone", "On this phone", WonderIcons.PictureAsPdf), WonderTab("create", "Create", WonderIcons.NoteAdd)),
         selectedTab = tab, onTab = { tab = it },
-        actions = { ToolbarButton(WonderIcons.FolderOpen, "Open PDF", { picker.launch(arrayOf("application/pdf")) }) }) {
+        actions = { ToolbarButton(WonderIcons.FolderOpen, "Open PDF", { picker.launch(arrayOf("application/pdf")) }) },
+        settings = { PagesSettings() }) {
         if (tab == "phone") PhoneTab(onOpen = { uri, name -> opened = uri to name })
         else if (tab == "create") CreateTab(onCreated = { uri -> opened = uri to context.displayName(uri) })
         else LibraryTab(onOpen = { opened = Uri.parse(it.uri) to it.name }, onPick = { picker.launch(arrayOf("application/pdf")) })
@@ -206,6 +210,9 @@ private fun Reader(uri: Uri, name: String, onClose: () -> Unit) {
     var busy by remember { mutableStateOf<String?>(null) }
     val toastRef = remember { mutableStateOf<(String) -> Unit>({}) }
     var chrome by remember { mutableStateOf(true) }
+    val hostView = androidx.compose.ui.platform.LocalView.current
+    DisposableEffect(Unit) { hostView.keepScreenOn = context.prefs("pages").getBoolean("keepAwake", true); onDispose { hostView.keepScreenOn = false } }
+    LaunchedEffect(Unit) { if (context.prefs("pages").getBoolean("hideChrome", false)) chrome = false }
     DisposableEffect(uri) {
         val job = scope.launch {
             val r = withContext(Dispatchers.IO) { runCatching { Doc(context, uri) to Store.key(context, uri) } }
@@ -274,25 +281,68 @@ private fun Reader(uri: Uri, name: String, onClose: () -> Unit) {
                         hits.forEach { (pg, r) -> Chip("p. ${pg + 1} (${r.size})", pg == current, { scope.launch { list.animateScrollToItem(pg) } }) }
                     } else if (query.length >= 2) Text("No matches", style = MaterialTheme.typography.bodySmall, color = p.secondaryText, modifier = Modifier.padding(top = 6.dp))
                 }
-                Box(Modifier.weight(1f).fillMaxWidth().background(if (paper == Paper.Night) Color(0xFF15171A) else Color(0xFF8E959D))
-                    .pointerInput(Unit) {
+                var dtCount by remember { mutableIntStateOf(0) }
+                var viewH by remember { mutableIntStateOf(1) }
+                Box(Modifier.weight(1f).fillMaxWidth().background(if (paper == Paper.Night) Color(0xFF15171A) else Color(0xFF8E959D)).onSizeChanged { viewH = it.height }
+                    .pointerInput(tool) {
+                        // One handler for everything: two fingers zoom around the pinch point, one finger scrolls (and pans when zoomed),
+                        // a flick keeps scrolling, and a quick second tap zooms in or back out.
+                        var fling: kotlinx.coroutines.Job? = null
+                        var lastTapAt = 0L; var lastTapPos = Offset.Zero
+                        fun applyZoom(newZoom: Float, cx: Float, cy: Float) {
+                            val z0 = zoom; val z1 = newZoom.coerceIn(1f, context.prefs("pages").getInt("maxZoom", 6).toFloat())
+                            if (z1 == z0) return
+                            list.dispatchRawDelta(cy / z0 - cy / z1)
+                            val w = size.width.toFloat()
+                            panX = (cx - w / 2 - (cx - w / 2 - panX) * z1 / z0)
+                            zoom = z1
+                            val maxPan = w * (zoom - 1) / 2; panX = if (zoom <= 1.001f) 0f else panX.coerceIn(-maxPan, maxPan)
+                        }
                         awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false)
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            fling?.cancel()
+                            val vt = androidx.compose.ui.input.pointer.util.VelocityTracker()
+                            vt.addPosition(down.uptimeMillis, down.position)
+                            var moved = false; var multi = false
                             do {
                                 val ev = awaitPointerEvent()
-                                if (ev.changes.size >= 2) {
-                                    zoom = (zoom * ev.calculateZoom()).coerceIn(1f, 5f)
-                                    val maxPan = size.width * (zoom - 1) / 2
-                                    panX = (panX + ev.calculatePan().x).coerceIn(-maxPan, maxPan)
-                                    if (zoom == 1f) panX = 0f
-                                    ev.changes.forEach { it.consume() }
+                                val n = ev.changes.count { it.pressed }
+                                if (n >= 2) multi = true
+                                val drawing = tool != null && n < 2
+                                if (!drawing && ev.changes.none { it.isConsumed }) {
+                                    val zc = ev.calculateZoom(); val pan = ev.calculatePan(); val c = ev.calculateCentroid(useCurrent = true)
+                                    if (zc != 1f || pan != Offset.Zero) {
+                                        if (zc != 1f && n >= 2) applyZoom(zoom * zc, c.x, c.y)
+                                        if (pan != Offset.Zero) {
+                                            list.dispatchRawDelta(-pan.y / zoom)
+                                            if (zoom > 1.001f) { val maxPan = size.width * (zoom - 1) / 2; panX = (panX + pan.x).coerceIn(-maxPan, maxPan) }
+                                        }
+                                        if (kotlin.math.abs(pan.x) + kotlin.math.abs(pan.y) > 0.5f) moved = true
+                                        ev.changes.forEach { it.consume() }
+                                    }
+                                    ev.changes.firstOrNull { it.pressed }?.let { vt.addPosition(it.uptimeMillis, it.position) }
                                 }
                             } while (ev.changes.any { it.pressed })
+                            val now = System.currentTimeMillis()
+                            if (!moved && !multi && tool == null) {
+                                if (now - lastTapAt < 300 && (down.position - lastTapPos).getDistance() < 80f) {
+                                    dtCount++; lastTapAt = 0L
+                                    if (zoom > 1.2f) { applyZoom(1f, down.position.x, down.position.y) } else applyZoom(context.prefs("pages").getInt("dtZoom", 25) / 10f, down.position.x, down.position.y)
+                                } else { lastTapAt = now; lastTapPos = down.position }
+                            } else if (!multi && tool == null) {
+                                val v = vt.calculateVelocity()
+                                if (kotlin.math.abs(v.y) > 300f) fling = scope.launch {
+                                    var last = 0f
+                                    androidx.compose.animation.core.AnimationState(0f, initialVelocity = -v.y / zoom).animateDecay(androidx.compose.animation.core.exponentialDecay(frictionMultiplier = 1.1f)) {
+                                        val d = value - last; last = value; list.dispatchRawDelta(d)
+                                    }
+                                }
+                            }
                         }
                     }) {
                     var boxW by remember { mutableIntStateOf(1) }
                     LazyColumn(Modifier.fillMaxSize().onSizeChanged { boxW = it.width }.graphicsLayer { scaleX = zoom; scaleY = zoom; translationX = panX; transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0f) },
-                        state = list, userScrollEnabled = tool == null, contentPadding = PaddingValues(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state = list, userScrollEnabled = false, contentPadding = PaddingValues(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(context.prefs("pages").getInt("gap", 8).dp)) {
                         items(d.pageCount) { i ->
                             PageView(d, i, boxW, zoom, paper, marks[i], hits[i], tool, color,
                                 onStroke = { s -> change(i, (marks[i] ?: PageMarks()).let { it.copy(strokes = it.strokes + s) }) },
@@ -302,10 +352,28 @@ private fun Reader(uri: Uri, name: String, onClose: () -> Unit) {
                                     if (left.size != pm.strokes.size || leftNotes.size != pm.notes.size) change(i, pm.copy(strokes = left, notes = leftNotes)) },
                                 onNote = { x, y -> editNote = Triple(i, -1, Note(x, y, "")) },
                                 onOpenNote = { idx, n -> editNote = Triple(i, idx, n) },
-                                onTap = { chrome = !chrome })
+                                onTap = { val seq = dtCount; scope.launch { delay(300); if (dtCount == seq) chrome = !chrome } })
                         }
                     }
                     if (tool == null) PageIndicator(current, d.pageCount, Modifier.align(Alignment.BottomCenter)) { sheet = "goto" }
+                    if (zoom > 1.01f) Text("${(zoom * 100).toInt()}%", Modifier.align(Alignment.TopEnd).padding(12.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = .62f))
+                        .clickable { zoom = 1f; panX = 0f }.padding(horizontal = 12.dp, vertical = 6.dp), color = Color.White, style = MaterialTheme.typography.labelLarge)
+                    // Fast scroller: drag the handle on the right edge to fly through the document.
+                    if (d.pageCount > 3) {
+                        var dragging by remember { mutableStateOf(false) }
+                        var frac by remember { mutableFloatStateOf(0f) }
+                        val shown = if (dragging) frac else current.toFloat() / (d.pageCount - 1).coerceAtLeast(1)
+                        Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(34.dp).pointerInput(d.pageCount) {
+                            detectDragGestures(onDragStart = { dragging = true }, onDragEnd = { dragging = false }, onDragCancel = { dragging = false }) { ch, _ ->
+                                frac = (ch.position.y / size.height).coerceIn(0f, 1f); ch.consume()
+                                scope.launch { list.scrollToItem((frac * (d.pageCount - 1)).roundToInt()) }
+                            }
+                        }) {
+                            Box(Modifier.align(Alignment.TopEnd).offset(y = with(androidx.compose.ui.platform.LocalDensity.current) { ((viewH - 90) * shown).toDp() } + 10.dp).padding(end = 4.dp).width(if (dragging) 8.dp else 5.dp).height(64.dp)
+                                .clip(RoundedCornerShape(50)).background(p.accent.copy(alpha = if (dragging) .95f else .55f)))
+                            if (dragging) Text("${(frac * (d.pageCount - 1)).roundToInt() + 1}", Modifier.align(Alignment.CenterStart).offset(x = (-70).dp).clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = .75f)).padding(horizontal = 14.dp, vertical = 8.dp), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
                 }
                 if (tool != null) AnnotateBar(tool!!, color, onTool = { tool = it }, onColor = { color = it }, canUndo = undo.isNotEmpty(),
                     onUndo = { undo.removeLastOrNull()?.let { (pg, old) -> marks[pg] = old; persist() } }, onDone = { tool = null })
@@ -565,4 +633,25 @@ private fun CreateTab(onCreated: (Uri) -> Unit) {
         }
     }
     busy?.let { WonderDialog(onDismissRequest = {}, title = { Text(it) }, text = { AquaProgress(null, Modifier.fillMaxWidth()) }, confirmButton = {}) }
+}
+
+/** Reading comfort and gestures. */
+@Composable
+private fun PagesSettings() {
+    val c = LocalContext.current; val pr = remember { c.prefs("pages") }
+    Panel(title = "Reading") {
+        var awake by remember { mutableStateOf(pr.getBoolean("keepAwake", true)) }
+        SwitchRow("Keep the screen on while reading", awake, { awake = it; pr.edit().putBoolean("keepAwake", it).apply() }, icon = WonderIcons.Visibility, tint = Color(0xFF8E44AD)); PanelDivider()
+        var hide by remember { mutableStateOf(pr.getBoolean("hideChrome", false)) }
+        SwitchRow("Open documents with the bars hidden", hide, { hide = it; pr.edit().putBoolean("hideChrome", it).apply() }, subtitle = "Tap the page once to bring them back", icon = WonderIcons.Fullscreen, tint = Color(0xFF1E7FE8)); PanelDivider()
+        var gap by remember { mutableIntStateOf(pr.getInt("gap", 8)) }
+        Column(Modifier.padding(16.dp, 10.dp)) { Text("Space between pages: $gap dp", style = MaterialTheme.typography.labelLarge); Slider(gap.toFloat(), { gap = it.toInt() }, valueRange = 0f..32f, onValueChangeFinished = { pr.edit().putInt("gap", gap).apply() }) }
+    }
+    Panel(title = "Zoom") {
+        var mz by remember { mutableIntStateOf(pr.getInt("maxZoom", 6)) }
+        Column(Modifier.padding(16.dp, 10.dp)) { Text("Most you can zoom in: ${mz}x", style = MaterialTheme.typography.labelLarge); Slider(mz.toFloat(), { mz = it.toInt() }, valueRange = 2f..10f, steps = 7, onValueChangeFinished = { pr.edit().putInt("maxZoom", mz).apply() }) }
+        PanelDivider()
+        var dz by remember { mutableIntStateOf(pr.getInt("dtZoom", 25)) }
+        Column(Modifier.padding(16.dp, 10.dp)) { Text("Double-tap zooms to ${dz / 10f}x", style = MaterialTheme.typography.labelLarge); Slider(dz.toFloat(), { dz = it.toInt() }, valueRange = 15f..50f, onValueChangeFinished = { pr.edit().putInt("dtZoom", dz).apply() }) }
+    }
 }

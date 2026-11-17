@@ -1,5 +1,11 @@
 # Pages changelog
 
+## v0.5.12
+
+- Reading overhaul: pinch zoom now follows your fingers, one finger scrolls and pans when zoomed in, a flick keeps scrolling, and double-tap zooms in or back out
+- A fast scroller on the right edge flies through long documents with a page number bubble, and a zoom badge shows how far in you are and resets with a tap
+- New settings: keep the screen on, open with bars hidden, space between pages, most you can zoom and double-tap zoom level
+
 ## v0.5.11
 
 - Loading screens now say what they are doing instead of showing a bare spinner
