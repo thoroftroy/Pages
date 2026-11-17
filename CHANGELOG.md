@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.15
+
+- Loading the PDF list now says what it is doing
+
 ## v0.5.14
 
 - New setting: which page colour new documents open in (Normal, Sepia or Night)

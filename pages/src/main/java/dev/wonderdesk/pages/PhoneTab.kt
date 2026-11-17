@@ -72,7 +72,7 @@ fun PhoneTab(onOpen: (Uri, String) -> Unit) {
             }
         }
         when {
-            docs == null -> item { AquaProgress(null, Modifier.fillMaxWidth()) }
+            docs == null -> item { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { Text("Looking for PDFs on this phone", style = MaterialTheme.typography.titleSmall); Text("Reading the Documents and Downloads folders, a few seconds the first time", style = MaterialTheme.typography.bodySmall, color = wonderPalette().secondaryText); AquaProgress(null, Modifier.fillMaxWidth()) } }
             list.isEmpty() -> item { EmptyState(if (q.isBlank()) "No PDFs found" else "No matches", if (q.isBlank()) "PDFs you download or receive show up here by themselves." else "Nothing called “$q”.", icon = WonderIcons.PictureAsPdf) }
             else -> items(list, key = { it.uri.toString() }) { d ->
                 Panel {
