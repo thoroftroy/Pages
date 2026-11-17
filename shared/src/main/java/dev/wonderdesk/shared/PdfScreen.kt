@@ -110,7 +110,7 @@ fun PdfScreen() {
     }
     if (jump) AlertDialog(onDismissRequest = { jump = false }, title = { Text("Go to page") }, text = {
         Column {
-            OutlinedTextField(requestedPage, { requestedPage = it.take(10); pageError = "" }, label = { Text("Page number (1–$total)") }, singleLine = true,
+            OutlinedTextField(requestedPage, { requestedPage = it.take(10); pageError = "" }, label = { Text("Page number (1 to $total)") }, singleLine = true,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number), isError = pageError.isNotEmpty())
             if (pageError.isNotEmpty()) Text(pageError, color = MaterialTheme.colorScheme.error)
         }
