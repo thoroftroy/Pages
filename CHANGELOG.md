@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.14
+
+- New setting: which page colour new documents open in (Normal, Sepia or Night)
+
 ## v0.5.13
 
 - Text size and accent colour chosen in Control Room now apply here

@@ -647,6 +647,10 @@ private fun PagesSettings() {
         var gap by remember { mutableIntStateOf(pr.getInt("gap", 8)) }
         Column(Modifier.padding(16.dp, 10.dp)) { Text("Space between pages: $gap dp", style = MaterialTheme.typography.labelLarge); Slider(gap.toFloat(), { gap = it.toInt() }, valueRange = 0f..32f, onValueChangeFinished = { pr.edit().putInt("gap", gap).apply() }) }
     }
+    Panel(title = "Page colour", footer = "Night inverts the page for dark rooms. You can also switch from the menu while reading.") {
+        var pap by remember { mutableStateOf(pr.getString("paper", "Normal") ?: "Normal") }
+        Row(Modifier.padding(16.dp, 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf("Normal", "Sepia", "Night").forEach { n -> Chip(n, pap == n, { pap = n; pr.edit().putString("paper", n).apply() }) } }
+    }
     Panel(title = "Zoom") {
         var mz by remember { mutableIntStateOf(pr.getInt("maxZoom", 6)) }
         Column(Modifier.padding(16.dp, 10.dp)) { Text("Most you can zoom in: ${mz}x", style = MaterialTheme.typography.labelLarge); Slider(mz.toFloat(), { mz = it.toInt() }, valueRange = 2f..10f, steps = 7, onValueChangeFinished = { pr.edit().putInt("maxZoom", mz).apply() }) }
