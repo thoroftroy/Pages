@@ -1,5 +1,10 @@
 # Pages changelog
 
+## v0.5.13
+
+- Text size and accent colour chosen in Control Room now apply here
+- New Rotate with the phone switch in Settings. Rotates by default
+
 ## v0.5.12
 
 - Reading overhaul: pinch zoom now follows your fingers, one finger scrolls and pans when zoomed in, a flick keeps scrolling, and double-tap zooms in or back out
