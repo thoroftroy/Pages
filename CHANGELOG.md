@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.16
+
+- Fixed a gap above the keyboard in screens with a bottom tab bar: the tab bar now steps aside while you type, so you can see what you are writing
+
 ## v0.5.15
 
 - Loading the PDF list now says what it is doing
