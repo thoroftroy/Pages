@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.5.20
+
+- The animated background is now drawn directly on the screen at full sharpness instead of a small picture stretched up, so it is smooth and no longer looks pixelated; the grain over it is much subtler, and long tab names (like Feedback) shrink to fit instead of being cut off
+
 ## v0.5.19
 
 - At night the animated background gets a stronger wash, so text stays easy to read on dark scenes
