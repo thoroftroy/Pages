@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.6.0
+
+- While you read, the background is calm and its colour travels from morning blue to evening gold as you get through the document; reaching the last page gets a burst
+
 ## v0.5.21
 
 - The symbols drifting in the background are smaller and fainter so they no longer crowd text; selected segments and chips are readable in every look (including Super); the warning banner at the top has a solid backing so its text is easy to read
