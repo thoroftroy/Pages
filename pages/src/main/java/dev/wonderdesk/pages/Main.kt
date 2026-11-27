@@ -255,7 +255,10 @@ private fun Reader(uri: Uri, name: String, onClose: () -> Unit) {
     val d = doc
     // Reading: a calm scene whose colour travels from morning blue to evening gold as you get through the document; the last page gets a burst.
     val readFrac = d?.let { if (it.pageCount > 1) ((current.toFloat() / (it.pageCount - 1)) * 10).toInt() / 10f else 0f } ?: 0f
-    SceneMoodEffect(SceneMood(hue = 210f - 172f * readFrac, energy = .35f, glyphs = listOf("¶", "§", "•", "·")))
+    // How far through: a tide that rises as you read. Every page you turn turns a big page in the scene too.
+    SceneMoodEffect(SceneMood(hue = 210f - 172f * readFrac, energy = .35f, glyphs = listOf("¶", "§", "•", "·"), level = readFrac))
+    var pageSeen by remember { mutableIntStateOf(current) }
+    LaunchedEffect(current) { if (current != pageSeen) SceneFeed.beat(); pageSeen = current }
     LaunchedEffect(current, d) { if (d != null && d.pageCount > 2 && current == d.pageCount - 1) WonderMood.celebrate(listOf("📖", "✦", "★")) }
     val isBookmarked = bookmarks.any { it.page == current }
     WonderApp(appName = "Pages", about = ABOUT, title = name.removeSuffix(".pdf"), subtitle = d?.let { "Page ${current + 1} of ${it.pageCount}" }, onBack = { if (tool != null) tool = null else if (searching) { searching = false; query = "" } else onClose() }, showChrome = chrome || tool != null || searching,

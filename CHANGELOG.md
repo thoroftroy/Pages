@@ -1,5 +1,14 @@
 # Pages changelog
 
+## v0.7.0
+
+- Turning a page turns a big page in the background too, and a tide rises as you get further through the book
+- The background answers your finger: a tap sends rings out and pops what it lands on, and dragging or scrolling leaves a wake and stirs the scene. Saving, adding, deleting and finishing things send a wave of colour through it, and an error gives a red shudder
+- The animated background now has a picture of its own behind everything: pages drifting down. It is faint, so text stays easy to read
+- Aqua changes far more through the day: a rose dawn, gold sunrise, turquoise morning, deep azure noon, warm afternoon, orange sunset, violet dusk and a real dark night with the moon shimmering through the water and glowing plankton. Now and then a cloud passes over and the light dims
+- Super's space changes with the time of day too: a dark night with brighter stars, a rose dawn, teal morning, cobalt noon and a red and amber sunset
+- Opening the app no longer sprays a burst of fast symbols across the background; celebrations are a gentle lift of a few symbols, and only for something you just did
+
 ## v0.6.0
 
 - While you read, the background is calm and its colour travels from morning blue to evening gold as you get through the document; reaching the last page gets a burst
