@@ -1,5 +1,9 @@
 # Pages changelog
 
+## v0.7.1
+
+- The moving background holds still while Battery Saver is on, so it uses next to no power then. It still changes with what the app is doing
+
 ## v0.7.0
 
 - Turning a page turns a big page in the background too, and a tide rises as you get further through the book
