@@ -648,9 +648,9 @@ private fun PagesSettings() {
     val c = LocalContext.current; val pr = remember { c.prefs("pages") }
     Panel(title = "Reading") {
         var awake by remember { mutableStateOf(pr.getBoolean("keepAwake", true)) }
-        SwitchRow("Keep the screen on while reading", awake, { awake = it; pr.edit().putBoolean("keepAwake", it).apply() }, icon = WonderIcons.Visibility, tint = Color(0xFF8E44AD)); PanelDivider()
+        SwitchRow("Keep the screen on while reading", awake, { awake = it; pr.edit().putBoolean("keepAwake", it).apply() }, icon = WonderIcons.Visibility, tint = Color(0xFF8E44AD), help = "Stops the screen from dimming and locking while a document is open, so it does not go dark in the middle of a page."); PanelDivider()
         var hide by remember { mutableStateOf(pr.getBoolean("hideChrome", false)) }
-        SwitchRow("Open documents with the bars hidden", hide, { hide = it; pr.edit().putBoolean("hideChrome", it).apply() }, subtitle = "Tap the page once to bring them back", icon = WonderIcons.Fullscreen, tint = Color(0xFF1E7FE8)); PanelDivider()
+        SwitchRow("Open documents with the bars hidden", hide, { hide = it; pr.edit().putBoolean("hideChrome", it).apply() }, subtitle = "Tap the page once to bring them back", icon = WonderIcons.Fullscreen, tint = Color(0xFF1E7FE8), help = "Documents open full screen with nothing around the page. Tap the page to bring the bars back."); PanelDivider()
         var gap by remember { mutableIntStateOf(pr.getInt("gap", 8)) }
         Column(Modifier.padding(16.dp, 10.dp)) { Text("Space between pages: $gap dp", style = MaterialTheme.typography.labelLarge); Slider(gap.toFloat(), { gap = it.toInt() }, valueRange = 0f..32f, onValueChangeFinished = { pr.edit().putInt("gap", gap).apply() }) }
     }
